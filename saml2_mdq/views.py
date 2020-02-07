@@ -18,7 +18,15 @@ def saml2_entity(request, entity):
         return HttpResponse('', status=404)
 
     # path traversal prevention
-    entity = entity.replace('..', '')
+    if entity != entity.replace('..', '').\
+                        replace('%2e%2e', '').\
+                        replace('\.', '').\
+                        replace('%5C.', '').\
+                        replace('%2e%2e%2f', '').\
+                        replace('%252e%252e', ''):
+        msg = 'Error Path traversal prevention on {}'.format(entity)
+        logger.error(msg)
+        return HttpResponse('Some digits in the entityID are not permitted', status=403)
 
     # if requested in sha1 format
     if entity[0:6] == '{sha1}':
