@@ -9,8 +9,8 @@ Let's suppose that we need a simple as possibile SAML2 MDQ server that:
 4) Haven't any signing or ValidUntil definitions features (TODO, not today)
 5) Must be used in a safe environment
 
-This means that we do not need of overlapping signatures and things, but just a Metadata accessible via web following Young MD Draft specification.
-Remeber that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process, this latter sucks less resources.
+This means that we do not need signatures and things, but just a Metadata accessible via web following Young MD Draft specification.
+Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process, this latter sucks less resources.
 
 Installation of the necessary software
 --------------------------------------

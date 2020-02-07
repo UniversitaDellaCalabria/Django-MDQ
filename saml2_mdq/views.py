@@ -29,6 +29,6 @@ def saml2_entity(request, entity):
 
     if os.path.exists(md_try):
         md_xml = open(md_try).read()
-        return HttpResponse(md_xml, content_type='text/xml')
+        return HttpResponse(md_xml, content_type='application/samlmetadata+xml')
     else:
         raise Http404()
