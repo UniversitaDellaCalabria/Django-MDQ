@@ -1,16 +1,16 @@
 Django SAML MDQ
 ---------------
 
-Let's suppose that we need a simple as possibile SAML2 MDQ server that:
+A lightweight SAML2 MDQ server that:
 
-1) Runs locally as a private service for multiple containers or VM
-2) Should be decoupled from pyFF
-3) Should be much more performant than pyFF MDQ service
-4) Haven't any signing or ValidUntil definitions features (TODO, not today)
-5) Must be used in a safe environment
+1) Runs on top of metadata downloaded and validated by a pyFF batch pipeline
+2) Is much more performant than a pyFFd MDQ service
+3) Have signing features (on top of xmlsec)
+4) Haven't ValidUntil definitions features yet (TODO, not today)
+5) Have a lightweight [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12) but it doesn't provide a full entities export (/entities). Probably in the future it will but not today.
 
-This means that we do not need signatures and things, but just a Metadata accessible via web following Young MD Draft specification.
-Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process, this latter sucks less resources.
+Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch).
+Django-MDQ support *urlencoded* entity names and *sha1* encoded entity names.
 
 Installation of the necessary software
 --------------------------------------
@@ -46,40 +46,20 @@ openssl req -nodes -new -x509 -days 3650 -keyout certificates/private.key -out c
 mkdir pipelines
 ````
 
-Create a pipelines to fetch and handle all the Idem + eduGAIN metadata, this would be similar to this
+Create a pipelines to fetch and handle all the Idem + eduGAIN metadata, this would be similar to the following.
+Name it `pipelines/garr_batch.fd`:
 ````
 # Metadata download and validation
 - load xrd garr-loaded.xrd:
   - ./pipelines/garr.xrd
 # select can even filter entity by IDPSSO or SPSSO Description and things ...
+# - select: "!//md:EntityDescriptor[md:SPSSODescriptor]"
 - select
 - store:
      directory: ./garr
 - publish:
      output: ./garr/garr-loaded.xml
 - stats
-
-# MDX server
-- when request:
-    - select
-    - pipe:
-        - when accept application/xml:
-             - xslt:
-                 stylesheet: tidy.xsl
-             - first
-             - finalize:
-                cacheDuration: PT5H
-                validUntil: P10D
-             - sign:
-                 key: certificates/private.key
-                 cert: certificates/public.cert
-             - emit application/xml
-             - break
-        - when accept application/json:
-             - xslt:
-                 stylesheet: discojson.xsl
-             - emit application/json:
-             - break
 ````
 
 Now create the XRD file where to configure the URLs where the Metadata can be downloaded.
@@ -137,6 +117,21 @@ selected:       6003
            sps: 2744
 ````
 
+Configure Django MDQ
+--------------------
+
+1. Copy `django_mdq/settingslocal.py.example` to `django_mdq/settingslocal.py` and edit it
+2. in `django_mdq/settingslocal.py` configure:
+   - `PYFF_METADATA_FOLDER` must point to the folder where the pyFF downloads periodically the metadata xml files.
+   - `METADATA_SIGNER_KEY` and `METADATA_SIGNER_CERT` to enable Metadata signing features
+2. This projects doesn't need of any database configuration
+3. Run it in development mode `./manage.py runserver 0.0.0.0:8001` or in production one (see gunicorn or uwsgi examples to do that)
+
+To create your Metadata RSA keys you can even use this example command:
+````
+openssl req -nodes -new -x509 -days 3650 -keyout certificates/private.key -out certificates/public.cert -subj '/CN=your.own.fqdn.com'
+````
+
 Shibboleth IdP Configuration
 ----------------------------
 
@@ -161,10 +156,25 @@ Just change `django_mdq.url` in your production url.
                   connectionRequestTimeout="PT5S"
                   connectionTimeout="PT5S"
                   socketTimeout="PT3S">
+
+    <!-- Enable this if you have configured METADATA_SIGNER_KEY and METADATA_SIGNER_CERT in Django-MDQ settingslocal.py
+    <MetadataFilter xsi:type="SignatureValidation" requireSignedRoot="true"
+                    certificateFile="%{idp.home}/credentials/mdq-cert.pem"/>
+    -->
+
     <MetadataQueryProtocol>https://django_mdq.url/</MetadataQueryProtocol>
     </MetadataProvider>
 
 </MetadataProvider>
+````
+
+Test the configuration
+````
+# reload ShibbolethIdP or Metadata Service
+touch /opt/jetty/webapps/idp.xml
+
+# do a mdquery
+/opt/shibboleth-idp/bin/mdquery.sh -e https://coco.release-check.edugain.org/shibboleth --saml2 -u http://localhost:8080/idp
 ````
 
 A test with PySAML2
@@ -178,7 +188,7 @@ import urllib.request
 from saml2.mdstore import MetaDataMDX
 
 # when available
-mdq_url = "http://192.168.27.27:8001"
+mdq_url = "http://django_mdq.url/:8001"
 entity2check = 'https://idp.unical.it/idp/shibboleth'
 
 mdx = MetaDataMDX(mdq_url) #, cert=cert)
@@ -191,62 +201,30 @@ mdx.service(entity2check, 'idpsso_descriptor', 'single_sign_on_service')
 mdx.certs(entity2check, "idpsso", use="signing")
 ````
 
-Configure Django MDQ
---------------------
-
-1. Copy `django_mdq/settingslocal.py.example` to `django_mdq/settingslocal.py` and edit it, `PYFF_METADATA_FOLDER` must point to the folder where the pyFF downloads periodically the metadata xml files.
-2. This projects doesn't need of any database configuration
-3. Run it in development mode `./manage.py runserver 0.0.0.0:8001` or in production one (see gunicorn or uwsgi examples to do that)
-
 Performance
 -----------
 
-First query of a Shibboleth IdP on a pyFF MDX Server, takes roughly 8 seconds, example with RedisWhoosStore and this configuration:
+The first query of a Shibboleth IdP (uncached) on a pure pyFF MDX Server takes roughly 8 seconds.
+The first query of a Shibboleth IdP (uncached) on Django-MDQ takes less then 1.5 seconds.
+
+Run pyFFd with RedisWhoosStore:
 ````
 PYFF_STORE_CLASS=pyff.store:RedisWhooshStore pyffd -p pyff.pid -f -a --dir=`pwd` -H 0.0.0.0 -P 8001  pipelines/garr.fd
 ````
 
-Or using gunicorn
+or Run pyFF using gunicorn instead:
 ````
 gunicorn --reload --reload-extra-file pipelines/garr.fd --preload --bind 0.0.0.0:8001 -t 600 -e PYFF_PIPELINE=pipelines/garr.fd -e PYFF_STORE_CLASS=pyff.store:RedisWhooshStore -e PYFF_UPDATE_FREQUENCY=600 -e PYFF_PORT=8001 --threads 4 --worker-tmp-dir=/dev/shm --worker-class=gthread pyff.wsgi:app
 ````
 
-Test from a real Shibboleth IdP 3.4.6
+Test pyFFd performance with a real Shibboleth IdP 3.4.6:
 ````
 time /opt/shibboleth-idp/bin/aacli.sh -n luigi -r https://coco.release-check.edugain.org/shibboleth  -u http://localhost:8080/idp
 
 {
 "requester": "https://coco.release-check.edugain.org/shibboleth",
 "principal": "luigi",
-"attributes": [
-
-
-  {
-    "name": "eduPersonScopedAffiliation",
-    "values": [
-              "staff@testunical.it"          ]
-  },
-
-  {
-    "name": "eduPersonTargetedID",
-    "values": [
-              "T6KCZHRUIHM27ENJE5A2LVQVYS6VCMS7"          ]
-  },
-
-  {
-    "name": "eduPersonPrincipalName",
-    "values": [
-              "luigi@testunical.it"          ]
-  },
-
-  {
-    "name": "email",
-    "values": [
-              "luigi@testunical.it"          ]
-  }
-
-]
-}
+"attributes": [ ... ]
 
 
 real    0m7.917s
@@ -254,42 +232,14 @@ user    0m0.316s
 sys 0m0.040s
 ````
 
-First query on django_mdq server, less than 1.5 seconds
+Test django_mdq server with the same but restarted Shibboleth 3.4.6:
 ````
 time /opt/shibboleth-idp/bin/aacli.sh -n luigi -r https://coco.release-check.edugain.org/shibboleth  -u http://localhost:8080/idp
 
 {
 "requester": "https://coco.release-check.edugain.org/shibboleth",
 "principal": "luigi",
-"attributes": [
-
-
-  {
-    "name": "eduPersonScopedAffiliation",
-    "values": [
-              "staff@testunical.it"          ]
-  },
-
-  {
-    "name": "eduPersonTargetedID",
-    "values": [
-              "T6KCZHRUIHM27ENJE5A2LVQVYS6VCMS7"          ]
-  },
-
-  {
-    "name": "eduPersonPrincipalName",
-    "values": [
-              "luigi@testunical.it"          ]
-  },
-
-  {
-    "name": "email",
-    "values": [
-              "luigi@testunical.it"          ]
-  }
-
-]
-}
+"attributes": [ ... ]
 
 
 real    0m1.354s
