@@ -20,6 +20,6 @@ setup(name=_name,
       author='Giuseppe De Marco',
       author_email='giuseppe.demarco@unical.it',
       license='BSD',
-      packages=[saml2_mdq],
+      packages=[_name],
       install_requires=['django', 'pyff'],
      )
