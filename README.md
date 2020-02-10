@@ -8,19 +8,35 @@ A lightweight SAML2 MDQ server that:
 3) Have signing features (on top of xmlsec)
 4) Have ValidUntil definitions feature
 5) Have a lightweight [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12) but it doesn't provide a full entities export (/entities). Probably in the future it will but not today.
-6) Supported Entities Identifiers: urlencoded, {sha1} and {base64}
+6) Supports the following Entities Identifiers: urlencoded, {sha1} and {base64}
 
 Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch).
 
-Django-MDQ supports *urlencoded* entity names and *sha1* encoded entity names.
+Table of contents
+-----------------
 
-Installation of the necessary software
---------------------------------------
+<!--ts-->
+   * #### Installation
+       * [Requirements](#requirements)
+       * [Configure pyFF](#configure-pyff)
+       * [Test the pipeline](#test-the-pipeline)
+       * [Configure Django MDQ](#configure-django-mdq)
+   * #### Client configurations
+      * [Shibboleth IdP Configuration](#shibboleth-idp-configuration)
+      * [PySAML2](#A-test-with-pysaml2)
+   * #### Performances
+      * [Performances](#performances)
+   * [Authors](#authors)
+   * [Credits](#credits)
+<!--te-->
+
+Requirements
+------------
 
 ````
 apt install build-essential python3-dev libxml2-dev libxslt1-dev libyaml-dev python3-pip
 pip3 install --upgrade pip
-pip3 install virtualenv django
+pip3 install virtualenv django lxml xmlsec
 ````
 
 Install [pyFF](https://pyff.io/)
@@ -105,7 +121,7 @@ Name it `pipelines/garr.xrd`
 </XRDS>
 ````
 
-Test the pipelines
+#### Test the pipeline
 ````
 
 pyff pipelines/garr.fd
@@ -141,6 +157,8 @@ Then
 2. in `django_mdq/settingslocal.py` configure:
    - `PYFF_METADATA_FOLDER` must point to the folder where the pyFF downloads periodically the metadata xml files.
    - `METADATA_SIGNER_KEY` and `METADATA_SIGNER_CERT` to enable Metadata signing features (optional, not required)
+   - `METADATA_CACHE_CONTROL` to set the Http-Header Cache control max-age
+   - `METADATA_VALID_UNTIL` to set the freshness of the metadata
 2. This projects doesn't need of any database configuration
 3. Run it in development mode `./manage.py runserver 0.0.0.0:8001` or in production one (see gunicorn or uwsgi examples to do that)
 
@@ -232,7 +250,7 @@ mdx.service(entity2check, 'idpsso_descriptor', 'single_sign_on_service')
 mdx.certs(entity2check, "idpsso", use="signing")
 ````
 
-Performance
+Performances
 -----------
 
 The first query of a Shibboleth IdP (uncached) on a pure pyFF MDX Server takes roughly 8 seconds.
