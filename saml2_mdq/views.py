@@ -8,7 +8,7 @@ from django.views.decorators.cache import cache_control
 from django.http import HttpResponse, FileResponse, Http404
 from django.shortcuts import render
 
-from . utils import sign_xml
+from . utils import sign_xml, add_valid_until
 
 
 logger = logging.getLogger(__name__)
@@ -41,22 +41,26 @@ def saml2_entity(request, entity):
         md_try = os.path.sep.join((md_path, sha_entity))
 
     md_try += '.xml'
+    dt_file_mod = os.path.getmtime(md_try)
     if os.path.exists(md_try):
+        md_xml = open(md_try, 'rb').read()
+
+        # if there validUntil configuration
+        if getattr(settings, 'METADATA_VALID_UNTIL', None):
+            md_xml = add_valid_until(md_xml, dt_file_mod)
+
         # test the existence of rsa keys for signing
         key_fname = getattr(settings, 'METADATA_SIGNER_KEY', None)
         cert_fname = getattr(settings, 'METADATA_SIGNER_CERT', None)
         if key_fname and cert_fname:
-            md_xml = sign_xml(md_try, key_fname, cert_fname)
+            md_xml = sign_xml(md_xml, key_fname, cert_fname)
             # md_xml = b"<?xml version='1.0' encoding='UTF-8'?>\n" + md_xml
-        # otherwise static serve without signing
-        else:
-            md_xml = open(md_try).read()
 
         # response
         response =  HttpResponse(md_xml,
                                  content_type='application/samlmetadata+xml',
                                  charset='utf-8')
-        response["Last-Modified"] = time.ctime(os.path.getmtime(md_try))
+        response["Last-Modified"] = time.ctime(dt_file_mod)
         response['Content-Disposition'] = 'inline; filename="{}.xml"'.format(sha_entity)
         return response
     else:

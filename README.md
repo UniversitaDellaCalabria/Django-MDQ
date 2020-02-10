@@ -6,7 +6,7 @@ A lightweight SAML2 MDQ server that:
 1) Runs on top of the metadata downloaded and validated by pyFF (batch pipeline)
 2) Is much more performant than a pyFFd MDQ service
 3) Have signing features (on top of xmlsec)
-4) Haven't ValidUntil definitions features yet (TODO, not today)
+4) Have ValidUntil definitions feature
 5) Have a lightweight [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12) but it doesn't provide a full entities export (/entities). Probably in the future it will but not today.
 
 Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch).
@@ -173,9 +173,13 @@ Just change `django_mdq.url` in your production url.
                   connectionTimeout="PT5S"
                   socketTimeout="PT3S">
 
-    <!-- Enable this if you have configured METADATA_SIGNER_KEY and METADATA_SIGNER_CERT in Django-MDQ settingslocal.py
+    <!-- Enable this if have configured METADATA_SIGNER_KEY and METADATA_SIGNER_CERT in Django-MDQ settingslocal.py
     <MetadataFilter xsi:type="SignatureValidation" requireSignedRoot="true"
                     certificateFile="%{idp.home}/credentials/mdq-cert.pem"/>
+    -->
+
+    <!-- Enable this if have configured METADATA_VALID_UNTIL in Django-MDQ settingslocal.py
+    <MetadataFilter xsi:type="RequiredValidUntil" maxValidityInterval="P14D"/>
     -->
 
     <MetadataQueryProtocol>https://django_mdq.url/</MetadataQueryProtocol>

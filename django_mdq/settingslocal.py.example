@@ -22,3 +22,6 @@ PYFF_METADATA_FOLDER='/path/to/pyFF_example/garr'
 
 # sets the METADATA Cache-Control: max-age= value
 METADATA_CACHE_CONTROL = 3600
+
+# in minutes: 2.5 days
+METADATA_VALID_UNTIL = 3600
