@@ -125,6 +125,7 @@ If you need to integrate `saml2_mdq` in a preexisting django project you can ins
 pip install saml2_mdq
 ````
 Then add `saml2_mdq` into your `settings.INSTALLED_APPS`, it doesn't need migrations.
+Add also `django.middleware.http.ConditionalGetMiddleware` in `settings.MIDDLEWARE` to enable `ETag` in the HttpResponse headers.
 
 If you instead just need a fully working MDQ server you can copy the entire project this way
 ````
