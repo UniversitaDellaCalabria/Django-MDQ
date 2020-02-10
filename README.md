@@ -8,6 +8,7 @@ A lightweight SAML2 MDQ server that:
 3) Have signing features (on top of xmlsec)
 4) Have ValidUntil definitions feature
 5) Have a lightweight [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12) but it doesn't provide a full entities export (/entities). Probably in the future it will but not today.
+6) Supported Entities Identifiers: urlencoded, {sha1} and {base64}
 
 Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch).
 
