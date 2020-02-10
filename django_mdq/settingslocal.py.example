@@ -17,5 +17,5 @@ ALLOWED_HOSTS = ['*']
 PYFF_METADATA_FOLDER='/path/to/pyFF_example/garr'
 
 # These are optional, if not configured the signing feature will not available
-METADATA_SIGNER_KEY = BASE_DIR + '/certificates/private.key'
-METADATA_SIGNER_CERT = BASE_DIR + '/certificates/public.cert'
+# METADATA_SIGNER_KEY = BASE_DIR + '/certificates/private.key'
+# METADATA_SIGNER_CERT = BASE_DIR + '/certificates/public.cert'

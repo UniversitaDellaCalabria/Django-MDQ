@@ -3,14 +3,15 @@ Django SAML MDQ
 
 A lightweight SAML2 MDQ server that:
 
-1) Runs on top of metadata downloaded and validated by a pyFF batch pipeline
+1) Runs on top of the metadata downloaded and validated by pyFF (batch pipeline)
 2) Is much more performant than a pyFFd MDQ service
 3) Have signing features (on top of xmlsec)
 4) Haven't ValidUntil definitions features yet (TODO, not today)
 5) Have a lightweight [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12) but it doesn't provide a full entities export (/entities). Probably in the future it will but not today.
 
 Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch).
-Django-MDQ support *urlencoded* entity names and *sha1* encoded entity names.
+
+Django-MDQ supports *urlencoded* entity names and *sha1* encoded entity names.
 
 Installation of the necessary software
 --------------------------------------
@@ -109,7 +110,7 @@ Test the pipelines
 pyff pipelines/garr.fd
 ````
 
-You should have aan output of this kind
+You should have an output of this kind
 ````
 total size:     6003
 selected:       6003
@@ -123,7 +124,7 @@ Configure Django MDQ
 1. Copy `django_mdq/settingslocal.py.example` to `django_mdq/settingslocal.py` and edit it
 2. in `django_mdq/settingslocal.py` configure:
    - `PYFF_METADATA_FOLDER` must point to the folder where the pyFF downloads periodically the metadata xml files.
-   - `METADATA_SIGNER_KEY` and `METADATA_SIGNER_CERT` to enable Metadata signing features
+   - `METADATA_SIGNER_KEY` and `METADATA_SIGNER_CERT` to enable Metadata signing features (optional, not required)
 2. This projects doesn't need of any database configuration
 3. Run it in development mode `./manage.py runserver 0.0.0.0:8001` or in production one (see gunicorn or uwsgi examples to do that)
 
@@ -168,7 +169,7 @@ Just change `django_mdq.url` in your production url.
 </MetadataProvider>
 ````
 
-Test the configuration
+#### Test the configuration
 ````
 # reload ShibbolethIdP or Metadata Service
 touch /opt/jetty/webapps/idp.xml
