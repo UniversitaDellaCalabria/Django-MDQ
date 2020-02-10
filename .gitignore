@@ -1,3 +1,6 @@
+saml2_mdq.egg-info/
+build
+dist
 db.sqlite3
 django_mdq/settingslocal.py
 certificates/*

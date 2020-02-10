@@ -120,6 +120,20 @@ selected:       6003
 
 Configure Django MDQ
 --------------------
+If you need to integrate `saml2_mdq` in a preexisting django project you can install it as an app:
+````
+pip install saml2_mdq
+````
+Then add `saml2_mdq` into your `settings.INSTALLED_APPS`, it doesn't need migrations.
+
+If you instead just need a fully working MDQ server you can copy the entire project this way
+````
+git clone https://github.com/UniversitaDellaCalabria/Django-MDQ.git
+cd Django-MDQ
+pip install -r requirements
+````
+
+Then
 
 1. Copy `django_mdq/settingslocal.py.example` to `django_mdq/settingslocal.py` and edit it
 2. in `django_mdq/settingslocal.py` configure:
