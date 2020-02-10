@@ -207,11 +207,21 @@ import urllib.request
 
 from saml2.mdstore import MetaDataMDX
 
+def b64(entity_name):
+    return '{base64}'+base64.b64encode(entity_name.encode()).decode()
+
 # when available
-mdq_url = "http://django_mdq.url/:8001"
+mdq_url = "http://localhost:8001"
+mdq_cert = "certificates/public.cert"
+
 entity2check = 'https://idp.unical.it/idp/shibboleth'
 
-mdx = MetaDataMDX(mdq_url) #, cert=cert)
+cert = open(mdq_cert)
+
+# omit cert if unavailable
+mdx = MetaDataMDX(mdq_url, cert=cert)
+# base64 entity name trasformation
+# mdx = MetaDataMDX(mdq_url, cert=cert, entity_transform=b64)
 
 # certificati
 mdx.certs(entity2check, "idpsso", use="encryption")

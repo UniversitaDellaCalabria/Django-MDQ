@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import logging
 import os
@@ -33,11 +34,16 @@ def saml2_entity(request, entity):
         logger.error(msg)
         return HttpResponse('Some digits in the entityID are not permitted', status=403)
 
-    sha_entity = hashlib.sha1(entity.encode()).hexdigest()
+    if entity[:8] == '{base64}':
+        entity_name = base64.b64decode(entity[8:]).decode()
+        sha_entity = hashlib.sha1(entity_name.encode()).hexdigest()
+        entity = '{sha1}'+'{}'.format(sha_entity)
+
     # if requested in sha1 format
-    if entity[0:6] == '{sha1}':
+    if entity[:6] == '{sha1}':
         md_try = os.path.sep.join((md_path, entity[6:]))
     else:
+        sha_entity = hashlib.sha1(entity.encode()).hexdigest()
         md_try = os.path.sep.join((md_path, sha_entity))
 
     md_try += '.xml'
@@ -61,7 +67,7 @@ def saml2_entity(request, entity):
                                  content_type='application/samlmetadata+xml',
                                  charset='utf-8')
         response["Last-Modified"] = time.ctime(dt_file_mod)
-        response['Content-Disposition'] = 'inline; filename="{}.xml"'.format(sha_entity)
+        #response['Content-Disposition'] = 'inline; filename="{}.xml"'.format(sha_entity)
         return response
     else:
         raise Http404()
