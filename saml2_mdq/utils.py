@@ -23,7 +23,7 @@ def sign_xml(xml_stream, key_fname, cert_fname):
 
     opts = dict()
     if hasattr(template, 'getroot') and \
-       hasattr(templace.getroot, '__call__'):
+       hasattr(template.getroot, '__call__'):
         root = template.getroot()
     else:
         root = template
@@ -31,5 +31,5 @@ def sign_xml(xml_stream, key_fname, cert_fname):
     if idattr:
         opts['reference_uri'] = "#{}".format(idattr)
 
-    signed_xml = xmlsec.sign(template, key_fname, cert_fname, **opts)
+    signed_xml = xmlsec.sign(root, key_fname, cert_fname, **opts)
     return etree.tostring(signed_xml)
