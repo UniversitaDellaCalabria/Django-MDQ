@@ -16,6 +16,33 @@ logger = logging.getLogger(__name__)
 
 
 @cache_control(max_age=getattr(settings, 'METADATA_CACHE_CONTROL', 3600))
+def saml2_entities(request):
+    md_path_file = settings.PYFF_METADATA_LOADED
+    if not os.path.exists(md_path_file):
+        msg = '{} Path does not exist'.format(md_path)
+        logger.error(msg)
+        return HttpResponse('', status=404)
+
+    md_xml = open(md_path_file, 'rb').read()
+    dt_file_mod = os.path.getmtime(md_path_file)
+
+    # if there validUntil configuration
+    if getattr(settings, 'METADATA_VALID_UNTIL', None):
+        md_xml = add_valid_until(md_xml, dt_file_mod)
+
+    # test the existence of rsa keys for signing
+    key_fname = getattr(settings, 'METADATA_SIGNER_KEY', None)
+    cert_fname = getattr(settings, 'METADATA_SIGNER_CERT', None)
+    if key_fname and cert_fname:
+        md_xml = sign_xml(md_xml, key_fname, cert_fname)
+
+    # response
+    return HttpResponse(md_xml,
+                        content_type='application/samlmetadata+xml',
+                        charset='utf-8')
+
+
+@cache_control(max_age=getattr(settings, 'METADATA_CACHE_CONTROL', 3600))
 def saml2_entity(request, entity):
     md_path = settings.PYFF_METADATA_FOLDER
     if not os.path.exists(md_path):

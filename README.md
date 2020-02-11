@@ -7,10 +7,10 @@ A lightweight SAML2 MDQ server that:
 2) Is much more performant than a pyFFd MDQ service
 3) Have signing features (on top of xmlsec)
 4) Have ValidUntil definitions feature
-5) Have a lightweight [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12) but it doesn't provide a full entities export (/entities). Probably in the future it will but not today.
+5) Have a lightweight [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12)
 6) Supports the following Entities Identifiers: urlencoded, {sha1} and {base64}
 
-Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch).
+Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch)
 
 Table of contents
 -----------------
@@ -155,7 +155,8 @@ Then
 
 1. Copy `django_mdq/settingslocal.py.example` to `django_mdq/settingslocal.py` and edit it
 2. in `django_mdq/settingslocal.py` configure:
-   - `PYFF_METADATA_FOLDER` must point to the folder where the pyFF downloads periodically the metadata xml files.
+   - `PYFF_METADATA_FOLDER` must point to the folder where the pyFF downloads periodically the metadata xml files
+   - `PYFF_METADATA_LOADED` must point to the full metadata xml published by pyff, containing all the entities
    - `METADATA_SIGNER_KEY` and `METADATA_SIGNER_CERT` to enable Metadata signing features (optional, not required)
    - `METADATA_CACHE_CONTROL` to set the Http-Header Cache control max-age
    - `METADATA_VALID_UNTIL` to set the freshness of the metadata

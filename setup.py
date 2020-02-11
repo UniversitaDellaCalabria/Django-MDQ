@@ -7,7 +7,7 @@ def readme():
         return f.read()
 
 setup(name=_name,
-      version='0.4',
+      version='0.6.0',
       zip_safe = False,
       description="Django SAML MDQ",
       long_description=readme(),
