@@ -49,7 +49,6 @@ def saml2_entity(request, entity):
         msg = '{} Path does not exist'.format(md_path)
         logger.error(msg)
         return HttpResponse('', status=404)
-
     # path traversal prevention
     if entity != entity.replace('..', '').\
                         replace('%2e%2e', '').\
@@ -59,7 +58,8 @@ def saml2_entity(request, entity):
                         replace('%252e%252e', ''):
         msg = 'Error Path traversal prevention on {}'.format(entity)
         logger.error(msg)
-        return HttpResponse('Some digits in the entityID are not permitted', status=403)
+        return HttpResponse('Some digits in the entityID are not permitted',
+                            status=403)
 
     if entity[:8] == '{base64}':
         entity_name = base64.b64decode(entity[8:]).decode()
@@ -87,14 +87,13 @@ def saml2_entity(request, entity):
         cert_fname = getattr(settings, 'METADATA_SIGNER_CERT', None)
         if key_fname and cert_fname:
             md_xml = sign_xml(md_xml, key_fname, cert_fname)
-            # md_xml = b"<?xml version='1.0' encoding='UTF-8'?>\n" + md_xml
 
         # response
+        content_type='application/samlmetadata+xml, application/xml, text/xml'
         response =  HttpResponse(md_xml,
-                                 content_type='application/samlmetadata+xml',
+                                 content_type=content_type,
                                  charset='utf-8')
         response["Last-Modified"] = time.ctime(dt_file_mod)
-        #response['Content-Disposition'] = 'inline; filename="{}.xml"'.format(sha_entity)
         return response
     else:
         raise Http404()
