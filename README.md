@@ -4,10 +4,9 @@ Django SAML MDQ
 A lightweight SAML2 MDQ server that implements [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12):
 
 1) Runs on top of the metadata downloaded and validated by pyFF (batch pipeline)
-2) Is much more performant than a pyFFd MDQ service
-3) Have signing features (on top of xmlsec)
-4) Have ValidUntil definitions feature
-5) Supports the following Entities Identifiers: urlencoded, {sha1} and {base64}
+2) Have signing features (on top of xmlsec)
+3) Have ValidUntil definitions feature
+4) Supports the following Entities Identifiers: urlencoded, {sha1} and {base64}
 
 Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch)
 
@@ -248,52 +247,6 @@ mdx.certs(entity2check, "idpsso", use="encryption")
 # get certs from idp
 mdx.service(entity2check, 'idpsso_descriptor', 'single_sign_on_service')
 mdx.certs(entity2check, "idpsso", use="signing")
-````
-
-Performances
------------
-
-The first query of a Shibboleth IdP (uncached) on a pure pyFF MDX Server takes roughly 8 seconds.
-The first query of a Shibboleth IdP (uncached) on Django-MDQ takes less then 1.5 seconds.
-
-Run pyFFd with RedisWhoosStore:
-````
-PYFF_STORE_CLASS=pyff.store:RedisWhooshStore pyffd -p pyff.pid -f -a --dir=`pwd` -H 0.0.0.0 -P 8001  pipelines/garr.fd
-````
-
-or Run pyFF using gunicorn instead:
-````
-gunicorn --reload --reload-extra-file pipelines/garr.fd --preload --bind 0.0.0.0:8001 -t 600 -e PYFF_PIPELINE=pipelines/garr.fd -e PYFF_STORE_CLASS=pyff.store:RedisWhooshStore -e PYFF_UPDATE_FREQUENCY=600 -e PYFF_PORT=8001 --threads 4 --worker-tmp-dir=/dev/shm --worker-class=gthread pyff.wsgi:app
-````
-
-Test pyFFd performance with a real Shibboleth IdP 3.4.6:
-````
-time /opt/shibboleth-idp/bin/aacli.sh -n luigi -r https://coco.release-check.edugain.org/shibboleth  -u http://localhost:8080/idp
-
-{
-"requester": "https://coco.release-check.edugain.org/shibboleth",
-"principal": "luigi",
-"attributes": [ ... ]
-
-
-real    0m7.917s
-user    0m0.316s
-sys 0m0.040s
-````
-
-Test django_mdq server with the same but restarted Shibboleth 3.4.6:
-````
-time /opt/shibboleth-idp/bin/aacli.sh -n luigi -r https://coco.release-check.edugain.org/shibboleth  -u http://localhost:8080/idp
-
-{
-"requester": "https://coco.release-check.edugain.org/shibboleth",
-"principal": "luigi",
-"attributes": [ ... ]
-
-
-real    0m1.354s
-user    0m0.348s
-sys 0m0.028s
 ````
 
 Authors
