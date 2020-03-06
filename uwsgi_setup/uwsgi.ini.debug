@@ -1,0 +1,44 @@
+[uwsgi]
+project     = django_mdq
+base        = /opt
+
+chdir       = %(base)/%(project)
+
+uid         = wert
+gid         = wert
+
+socket      = 127.0.0.1:3005
+master      = true
+processes   = 1
+# buffer-size = 32768
+#threads     = 2
+
+# se installato con pip non serve il plugin perchè embedded
+#plugins    = python
+# con virtualenv non serve
+#pythonpath     = %(base)/%(project)/%(project)
+
+virtualenv  = %(base)/django-pysaml2.env
+
+# equivalente a daemonize|logto
+#logto = /var/log/uwsgi/%(project).log
+#log-maxsize = 100000000
+#log-backupname = /var/log/uwsgi/%(project).old.log
+
+module      = django_mdq.wsgi:application
+vacuum      = True
+
+honour-stdin = true
+
+# respawn processes after serving 5000 requests
+max-requests    = 1000
+
+# respawn processes taking more than takes more then ... seconds
+harakiri    = 1033
+
+env         = DJANGO_SETTINGS_MODULE = %(project).settings
+
+pidfile     = /var/log/uwsgi/%(project).pid
+touch-reload    = %(base)/%(project)/django_mdq/settings.py
+#stats       = 127.0.0.1:9195
+#stats-http = True

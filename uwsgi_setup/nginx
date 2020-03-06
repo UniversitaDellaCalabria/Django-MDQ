@@ -1,0 +1,31 @@
+upstream django_mdq {
+    server 127.0.0.1:3005;
+}
+
+server {
+    # the port your site will be served on
+    listen      80;
+    server_name mdq.auth.unical.it;
+
+    access_log /var/log/nginx/mdq.auth.unical.it.access.log;
+    error_log  /var/log/nginx/mdq.auth.unical.it.error.log error;
+
+    location ~ /static/sha1/entities/\{sha1\}(.*) {
+       default_type "application/xml; charset=utf-8";
+       alias /opt/pyff/md/$1.xml;
+    }
+
+    location ~ /static/sha1/entities$ {
+       default_type "application/xml; charset=utf-8";
+       alias /opt/pyff/md/md-loaded.xml;
+    }
+
+    location / {      
+        rewrite ./ $request_uri break;        
+        uwsgi_param REQUEST_METHOD $request_method;
+        uwsgi_read_timeout 34;
+        include     /opt/django_mdq/uwsgi_setup/uwsgi_params;
+        uwsgi_pass  django_mdq;
+    }
+
+}

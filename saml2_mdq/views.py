@@ -3,6 +3,7 @@ import hashlib
 import logging
 import os
 import time
+import urllib
 
 from django.conf import settings
 from django.views.decorators.cache import cache_control
@@ -70,12 +71,13 @@ def saml2_entity(request, entity):
     if entity[:6] == '{sha1}':
         md_try = os.path.sep.join((md_path, entity[6:]))
     else:
+        entity = urllib.parse.unquote_plus(entity)
         sha_entity = hashlib.sha1(entity.encode()).hexdigest()
         md_try = os.path.sep.join((md_path, sha_entity))
 
     md_try += '.xml'
-    dt_file_mod = os.path.getmtime(md_try)
     if os.path.exists(md_try):
+        dt_file_mod = os.path.getmtime(md_try)
         md_xml = open(md_try, 'rb').read()
 
         # if there validUntil configuration
