@@ -42,7 +42,7 @@ def saml2_entities(request):
     response =  HttpResponse(md_xml,
                              content_type=content_type,
                              charset='utf-8')
-
+    return response
 
 @cache_control(max_age=getattr(settings, 'METADATA_CACHE_CONTROL', 3600))
 def saml2_entity(request, entity):
