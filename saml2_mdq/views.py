@@ -38,9 +38,10 @@ def saml2_entities(request):
         md_xml = sign_xml(md_xml, key_fname, cert_fname)
 
     # response
-    return HttpResponse(md_xml,
-                        content_type='application/samlmetadata+xml',
-                        charset='utf-8')
+    content_type='application/samlmetadata+xml, application/xml, text/xml'
+    response =  HttpResponse(md_xml,
+                             content_type=content_type,
+                             charset='utf-8')
 
 
 @cache_control(max_age=getattr(settings, 'METADATA_CACHE_CONTROL', 3600))
