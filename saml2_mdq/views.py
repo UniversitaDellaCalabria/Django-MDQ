@@ -63,6 +63,7 @@ def saml2_entity(request, entity):
         return HttpResponse('Some digits in the entityID are not permitted',
                             status=403)
 
+    entity = urllib.parse.unquote_plus(entity)
     if entity[:8] == '{base64}':
         entity_name = base64.b64decode(entity[8:]).decode()
         sha_entity = hashlib.sha1(entity_name.encode()).hexdigest()
@@ -72,7 +73,6 @@ def saml2_entity(request, entity):
     if entity[:6] == '{sha1}':
         md_try = os.path.sep.join((md_path, entity[6:]))
     else:
-        entity = urllib.parse.unquote_plus(entity)
         sha_entity = hashlib.sha1(entity.encode()).hexdigest()
         md_try = os.path.sep.join((md_path, sha_entity))
 
