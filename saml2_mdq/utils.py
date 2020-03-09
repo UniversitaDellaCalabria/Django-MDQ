@@ -11,7 +11,6 @@ def add_valid_until(xml_stream, dt_start):
     template = etree.XML(xml_stream)
     if template.get('validUntil'):
         return etree.tostring(template)
-
     offset = datetime.timedelta(minutes=settings.METADATA_VALID_UNTIL)
     dt = datetime.datetime.fromtimestamp(dt_start) + offset
     template.set('validUntil', dt.strftime("%Y-%m-%dT%H:%M:%SZ"))

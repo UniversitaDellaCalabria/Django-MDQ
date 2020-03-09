@@ -1,4 +1,5 @@
 import base64
+import datetime
 import hashlib
 import logging
 import os
@@ -25,7 +26,8 @@ def saml2_entities(request):
         return HttpResponse('', status=404)
 
     md_xml = open(md_path_file, 'rb').read()
-    dt_file_mod = os.path.getmtime(md_path_file)
+    #dt_file_mod = os.path.getmtime(md_path_file)
+    dt_file_mod = datetime.datetime.now().timestamp()
 
     # if there validUntil configuration
     if getattr(settings, 'METADATA_VALID_UNTIL', None):
@@ -38,7 +40,9 @@ def saml2_entities(request):
         md_xml = sign_xml(md_xml, key_fname, cert_fname)
 
     # response
-    content_type='application/samlmetadata+xml, application/xml, text/xml'
+    # Shibboleth have: java.lang.IllegalArgumentException: Could not parse 'application/samlmetadata+xml, application/xml, text/xml'
+    #content_type='application/samlmetadata+xml, application/xml, text/xml'
+    content_type='application/samlmetadata+xml'
     response =  HttpResponse(md_xml,
                              content_type=content_type,
                              charset='utf-8')
@@ -78,7 +82,8 @@ def saml2_entity(request, entity):
 
     md_try += '.xml'
     if os.path.exists(md_try):
-        dt_file_mod = os.path.getmtime(md_try)
+        #dt_file_mod = os.path.getmtime(md_try)
+        dt_file_mod = datetime.datetime.now().timestamp()
         md_xml = open(md_try, 'rb').read()
 
         # if there validUntil configuration
@@ -92,7 +97,9 @@ def saml2_entity(request, entity):
             md_xml = sign_xml(md_xml, key_fname, cert_fname)
 
         # response
-        content_type='application/samlmetadata+xml, application/xml, text/xml'
+        # Shibboleth have: java.lang.IllegalArgumentException: Could not parse 'application/samlmetadata+xml, application/xml, text/xml'
+        #content_type='application/samlmetadata+xml, application/xml, text/xml'
+        content_type='application/samlmetadata+xml'
         response =  HttpResponse(md_xml,
                                  content_type=content_type,
                                  charset='utf-8')
