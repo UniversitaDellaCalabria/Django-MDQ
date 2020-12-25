@@ -1,0 +1,96 @@
+# This repository adheres to the publiccode.yml standard by including this 
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: '0.2'
+categories:
+  - content-management
+dependsOn:
+  open:
+    - name: MariaDB
+      optional: false
+      version: ''
+      versionMax: ''
+      versionMin: ''
+    - name: Python
+      optional: false
+      version: ''
+      versionMax: ''
+      versionMin: ''
+    - name: Django
+      optional: false
+      version: ''
+      versionMax: ''
+      versionMin: ''
+description:
+  en:
+    documentation: 'https://github.com/UniversitaDellaCalabria/Django-MDQ/blob/master/README.md'
+    features:
+        - Runs on top of the metadata downloaded and validated by pyFF (batch pipeline)
+        - Have signing features (on top of xmlsec)
+        - Have ValidUntil definitions feature
+        - Supports the following Entities Identifiers: urlencoded, {sha1} and {base64}
+    genericName: web application
+    longDescription: >
+        Django SAML MDQ
+        ---------------
+        
+        A lightweight SAML2 MDQ server that implements [draft-young-md-query implementation](https://tools.ietf.org/html/draft-young-md-query-12):
+        
+        1) Runs on top of the metadata downloaded and validated by pyFF (batch pipeline)
+        2) Have signing features (on top of xmlsec)
+        3) Have ValidUntil definitions feature
+        4) Supports the following Entities Identifiers: urlencoded, {sha1} and {base64}
+        
+        Remember that pyFF is needed for metadata downloading, it can run as daemon or as a scheduled process (batch)
+            
+    shortDescription: A lightweight SAML2 MDQ server that implements draft-young-md-query implementation.
+developmentStatus: stable
+intendedAudience:
+  scope:
+    - employment
+it:
+  conforme:
+    gdpr: true
+    lineeGuidaDesign: false
+    misureMinimeSicurezza: true
+    modelloInteroperabilita: false
+  countryExtensionVersion: '0.2'
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: false
+  riuso:
+    codiceIPA: unical
+landingURL: 'https://github.com/UniversitaDellaCalabria/Django-MDQ'
+legal:
+  authorsFile: >-
+    https://github.com/UniversitaDellaCalabria/Django-MDQ/blob/master/AUTHORS
+  license: Apache-2.0
+  mainCopyrightOwner: Università della Calabria
+localisation:
+  availableLanguages:
+    - it
+    - en
+  localisationReady: true
+maintenance:
+  contacts:
+    - affiliation: unical.it
+      email: giuseppe.demarco@unical.it
+      name: Giuseppe De Marco
+    - affiliation: unical.it
+      email: francesco.filicetti@unical.it
+      name: Francesco Filicetti
+  type: internal
+name: Django-MDQ
+platforms:
+  - linux
+  - web
+releaseDate: '2020-01-13'
+roadmap: 'https://github.com/UniversitaDellaCalabria/Django-MDQ/issues'
+softwareType: standalone/web
+softwareVersion: 1.2.0
+url: 'https://github.com/UniversitaDellaCalabria/Django-MDQ'
+usedBy:
+  - 'https://www.unical.it'
