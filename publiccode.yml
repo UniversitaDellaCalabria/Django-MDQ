@@ -29,7 +29,7 @@ description:
         - Runs on top of the metadata downloaded and validated by pyFF (batch pipeline)
         - Have signing features (on top of xmlsec)
         - Have ValidUntil definitions feature
-        - Supports the following Entities Identifiers: urlencoded, {sha1} and {base64}
+        - Supported Entity Identifiers are urlencoded, sha1 and base64
     genericName: web application
     longDescription: >
         Django SAML MDQ
