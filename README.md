@@ -32,7 +32,7 @@ Requirements
 ------------
 
 ````
-apt install build-essential python3-dev libxml2-dev libxslt1-dev libyaml-dev python3-pip
+apt install build-essential xmlsec1 python3-dev libxml2-dev libxslt1-dev libyaml-dev python3-pip
 pip3 install --upgrade pip
 pip3 install virtualenv django lxml xmlsec
 ````
