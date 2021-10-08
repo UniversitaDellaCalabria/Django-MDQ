@@ -5,6 +5,25 @@ from django.conf import settings
 from lxml import etree
 
 
+import pathlib
+import urllib
+import re
+
+
+class TraversalPathError(Exception):
+    pass
+
+
+def is_valid_path(root_path, target_path):
+    root_path = pathlib.Path(root_path)
+    target_path_decoded = urllib.parse.unquote_plus(target_path)
+    target_path_resolved = os.path.abspath(pathlib.Path(target_path_decoded).absolute())
+
+    if re.match(os.path.abspath(root_path), target_path_resolved):
+        #raise TraversalPathError(f"{target_path_resolved} is outside of {root_path}")
+        return True
+
+
 def add_valid_until(xml_stream, dt_start):
     #template = etree.parse(xml_fname).getroot()
     #template = etree.fromstring(xml_stream).getroot()
