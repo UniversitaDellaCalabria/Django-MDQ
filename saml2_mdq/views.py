@@ -11,7 +11,7 @@ from django.views.decorators.cache import cache_control
 from django.http import HttpResponse, FileResponse, Http404
 from django.shortcuts import render
 
-from . utils import sign_xml, add_valid_until
+from . utils import sign_xml, add_valid_until, is_valid_path
 
 
 logger = logging.getLogger(__name__)
@@ -56,12 +56,7 @@ def saml2_entity(request, entity):
         logger.error(msg)
         return HttpResponse('', status=404)
     # path traversal prevention
-    if entity != entity.replace('..', '').\
-                        replace('%2e%2e', '').\
-                        replace('\.', '').\
-                        replace('%5C.', '').\
-                        replace('%2e%2e%2f', '').\
-                        replace('%252e%252e', ''):
+    if not is_valid_path(md_path, entity):
         msg = 'Error Path traversal prevention on {}'.format(entity)
         logger.error(msg)
         return HttpResponse('Some digits in the entityID are not permitted',
